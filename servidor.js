@@ -1,51 +1,46 @@
-//import { createServer } from 'node:http' 
-
-// const server = createServer((request, response) => {
-    //Response.write('hello word')
-
-    //return response.end
-//})
-
-//server.listen(4444)
-
-
-
 import {fastify} from 'fastify'
-
 import { DataBaseMemory } from './data_base.js'
 
 const servidor = fastify()
-
 const database = new DataBaseMemory()
 
 servidor.post('/videos', (request, reply) => {
+    const {title, description, duration}  = request.body
+    consolelog(body)
     database.create({
-        title: 'Video 01', 
-        description: 'esse é o vídeo 01', 
-        duration: '180', 
+        title: title, 
+        description: description, 
+        duration: duration, 
     })
 
     console.log(database.list)
-
     return reply.status(201).send()
-
-})
-servidor.get('/videos', () => {
-    return ' e ai, voce chamou os videos.'
-} ) 
-
-
-
-servidor.put( '/videos/:id', () => {
-    return 'qual foi meu truta? voce chamou a segunda versao do servidor'
 })
 
+servidor.get('/videos', (request,  reply) => {
+    const videos = database.list
 
+    console.log(videos)
 
-servidor.delete('/videos/:id', () => {
-    return 'olá node.js'
+    return videos
+} )
+
+servidor.put( '/videos/:id', (request, reply) => {
+    const videoId = request.params.id
+    const {title, description, duration}  = request.body
+    const video = database.update(videoId, {
+        title,
+        description,
+        duration,
+    })
+    return reply.status(204).send()
 })
 
+servidor.delete('/videos/:id', (request, reply) => {
+    const videoId = request.params.id
+    database.delete(videoId)
+    return reply.status(200).send()
+})
 
 servidor.listen({
     port: 5555,
